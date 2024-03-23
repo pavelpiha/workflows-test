@@ -1,95 +1,64 @@
-const { Octokit } = require('@octokit/rest');
+const { Octokit } = require("@octokit/rest");
 
-const ORG_NAME = process.env.ORG_NAME;
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
-const octokit = new Octokit({ auth: GITHUB_TOKEN });
+const octokit = new Octokit({
+  auth: process.env.GITPAT,
+});
 
-const formatDate = (date) => {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-};
-
-const getLastMonthDateRange = () => {
-  const endDate = new Date();
-  endDate.setDate(1);
-  endDate.setHours(0, 0, 0, 0);
-
-  const startDate = new Date(endDate);
-  startDate.setMonth(endDate.getMonth() - 1);
-
-  return { start: formatDate(startDate), end: formatDate(endDate) };
-};
-async function fetchAllRepositories() {
-  await octokit.rest.repos
-    .listForOrg({
-      org: ORG_NAME,
-      type: 'private',
-    })
-    .then(({ data }) => {
-      // handle data
-      console.log('data', data);
-    });
-}
-
-async function getRepositories() {
+async function fetchPrivateRepos() {
   await octokit
-    .request(`GET /orgs/${ORG_NAME}/repos`, {
-      org: ORG_NAME,
-      type: 'private',
+    .request("GET /user/repos", {
+      type: "private",
       headers: {
-        'X-GitHub-Api-Version': '2022-11-28',
+        "X-GitHub-Api-Version": "2022-11-28",
       },
     })
-    .then(({ data }) => {
-      console.log('data1', data);
+    .then((response) => {
+      console.log("Repos:", response.data);
+    })
+    .catch((error) => {
+      console.error("Error fetching repos:", error.message);
     });
 }
-async function fetchRepositories(orgName) {
-  let repos = [];
-  for await (const response of octokit.paginate.iterator(octokit.rest.repos.listForOrg, {
-    org: orgName,
-    type: 'private',
-    per_page: 1000,
-  })) {
-    repos = repos.concat(response.data.map((repo) => repo.name));
-    console.log('repos', repos);
-  }
-  return repos;
-}
 
-async function calculateWorkflowRunMinutes(repoName, startDate, endDate) {
-  let runMinutes = 0;
-
-  for await (const response of octokit.paginate.iterator(octokit.rest.actions.listWorkflowRunsForRepo, {
-    owner: ORG_NAME,
-    repo: repoName,
+async function fetchRepos(page = 1, repoArr = []) {
+  const { data } = await octokit.rest.repos.listForAuthenticatedUser({
+    visibility: "private",
     per_page: 100,
-    created: `${startDate}..${endDate}`,
-  })) {
-    for (let run of response.data) {
-      console.log('!!!!!!!!!!', run);
-      const runDuration = new Date(run.updated_at) - new Date(run.created_at);
-      runMinutes += runDuration / 60000; // Convert milliseconds to minutes
-    }
+    page,
+  });
+
+  repoArr.push(
+    ...data.map((repo) => ({
+      name: repo.name,
+      url: repo.html_url,
+      actionsUsed: repo.has_actions,
+    }))
+  );
+
+  // If we have more repos than can be returned on one page
+  if (data.length === 100) {
+    return await fetchRepos(page + 1, repoArr);
   }
 
-  return runMinutes;
+  return repoArr;
 }
 
-async function analyzeWorkflows() {
-  const { start, end } = getLastMonthDateRange();
-  const repos = await fetchRepositories(ORG_NAME);
-  let results = [];
+(async () => {
+  const repos = await fetchRepos(); // fetch all private repos
+  const reposWithActions = repos.filter((repo) => repo.actionsUsed); // find ones using Actions
+  let billableTime = 0;
 
-  for (let repo of repos) {
-    const totalMinutes = await calculateWorkflowRunMinutes(repo, start, end);
-    if (totalMinutes > 0) {
-      results.push({ Repository: repo, TotalRunMinutesLastMonth: totalMinutes.toFixed(2) });
-    }
+  for (const repo of reposWithActions) {
+    const usage = await octokit.rest.actions.listRepoWorkflowRuns({
+      owner: process.env.USER,
+      repo: repo.name,
+    });
+
+    billableTime += usage.data.total_count;
   }
 
-  console.table(results);
-}
+  console.table(reposWithActions);
+  console.log("Total Billable time: ", billableTime);
+})().catch((err) => console.error(err));
 
-analyzeWorkflows().catch(console.error);
-fetchAllRepositories().catch(console.error);
-getRepositories().catch(console.error);
+fetchPrivateRepos();

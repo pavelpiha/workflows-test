@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - "feature/workflows"
+      - "main"
 
 jobs:
   run-script:
@@ -17,8 +18,11 @@ jobs:
         with:
           node-version: 20
         env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-          ORG_NAME: "pavelpiha"
-      - run: |
-          npm install @octokit/rest @octokit/core
-          node ./.github/scripts/analyze-billable-time.js
+          USER: "pavelpiha"
+          # GITPAT: ${{secrets.GITPAT}}
+          GITPAT: ${{secrets.GIT_PAT_FINE_GRAINED}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - name: Install Dependencies
+        run: npm install @octokit/rest @octokit/core
+      - name: Run Script
+        run: node ./.github/scripts/analyze-billable-time.js
