@@ -20,6 +20,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
           ORG_NAME: "pavelpiha"
-      - run: |
-          npm install @octokit/rest @octokit/core
-          node ./.github/scripts/analyze-billable-time.js
+      - name: Install Dependencies
+        run: npm install @octokit/rest @octokit/core
+      - name: Run Script
+        run: node ./.github/scripts/analyze-billable-time.js
