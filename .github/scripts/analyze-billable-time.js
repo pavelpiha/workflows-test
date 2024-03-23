@@ -4,6 +4,22 @@ const octokit = new Octokit({
   auth: process.env.GITPAT,
 });
 
+async function fetchPrivateRepos() {
+  await octokit
+    .request("GET /user/repos", {
+      type: "private",
+      headers: {
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    })
+    .then((response) => {
+      console.log("Repos:", response.data);
+    })
+    .catch((error) => {
+      console.error("Error fetching repos:", error.message);
+    });
+}
+
 async function fetchRepos(page = 1, repoArr = []) {
   const { data } = await octokit.rest.repos.listForAuthenticatedUser({
     visibility: "private",
@@ -44,3 +60,5 @@ async function fetchRepos(page = 1, repoArr = []) {
   console.table(reposWithActions);
   console.log("Total Billable time: ", billableTime);
 })().catch((err) => console.error(err));
+
+fetchPrivateRepos();
