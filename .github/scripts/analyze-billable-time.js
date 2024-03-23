@@ -1,7 +1,7 @@
 const { Octokit } = require("@octokit/rest");
 const { table } = require("console");
 
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const GITHUB_TOKEN = process.env.GITPAT;
 const octokit = new Octokit({ auth: GITHUB_TOKEN });
 
 async function getPrivateRepos() {
