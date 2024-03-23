@@ -5,6 +5,7 @@ on:
   pull_request:
     branches:
       - "feature/workflows"
+      - "main"
 
 jobs:
   fetch_request:
