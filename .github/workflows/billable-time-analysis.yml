@@ -18,7 +18,8 @@ jobs:
         with:
           node-version: 20
         env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GITPAT: ${{secrets.GITPAT}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: Install Dependencies
         run: npm install @octokit/rest @octokit/core
       - name: Run Script
