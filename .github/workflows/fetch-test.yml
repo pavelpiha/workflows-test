@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: 18
         env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          NODE_AUTH_TOKEN: ${{secrets.GITPAT}}
           ORG_NAME: "pavelpiha"
       - name: Install Dependencies
         # run: npm install axios
