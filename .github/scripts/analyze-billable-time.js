@@ -1,34 +1,46 @@
 const { Octokit } = require("@octokit/rest");
-const { table } = require("console");
 
-const GITHUB_TOKEN = process.env.GITPAT;
-const octokit = new Octokit({ auth: GITHUB_TOKEN });
+const octokit = new Octokit({
+  auth: process.env.GITPAT,
+});
 
-async function getPrivateRepos() {
-  const repos = await octokit.paginate(octokit.repos.listForAuthenticatedUser, {
+async function fetchRepos(page = 1, repoArr = []) {
+  const { data } = await octokit.rest.repos.listForAuthenticatedUser({
     visibility: "private",
+    per_page: 100,
+    page,
   });
 
-  const actionsRepos = repos.filter((repo) => repo.has_workflows);
-
-  const billableTimes = await Promise.all(
-    actionsRepos.map(async (repo) => {
-      const { data: usage } = await octokit.request(
-        "GET /repos/{owner}/{repo}/actions/usage",
-        {
-          owner: repo.owner.login,
-          repo: repo.name,
-        }
-      );
-
-      return {
-        name: repo.name,
-        billable_ms: usage.billable.total_ms,
-      };
-    })
+  repoArr.push(
+    ...data.map((repo) => ({
+      name: repo.name,
+      url: repo.html_url,
+      actionsUsed: repo.has_actions,
+    }))
   );
 
-  table(billableTimes);
+  // If we have more repos than can be returned on one page
+  if (data.length === 100) {
+    return await fetchRepos(page + 1, repoArr);
+  }
+
+  return repoArr;
 }
 
-getPrivateRepos();
+(async () => {
+  const repos = await fetchRepos(); // fetch all private repos
+  const reposWithActions = repos.filter((repo) => repo.actionsUsed); // find ones using Actions
+  let billableTime = 0;
+
+  for (const repo of reposWithActions) {
+    const usage = await octokit.rest.actions.listRepoWorkflowRuns({
+      owner: process.env.USER,
+      repo: repo.name,
+    });
+
+    billableTime += usage.data.total_count;
+  }
+
+  console.table(reposWithActions);
+  console.log("Total Billable time: ", billableTime);
+})().catch((err) => console.error(err));
