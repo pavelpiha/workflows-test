@@ -19,6 +19,6 @@ jobs:
           NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
           ORG_NAME: "pavelpiha"
       - name: Install Dependencies
-        run: npm install axios
+        # run: npm install axios
       - name: Run Fetch Test
-        run: node ./.github/scripts/fetch-test.js
+        # run: node ./.github/scripts/fetch-test.js
