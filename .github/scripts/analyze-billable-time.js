@@ -1,13 +1,11 @@
 const { Octokit } = require("@octokit/rest");
 
-const octokit = new Octokit({
-  auth: process.env.GITPAT,
-});
+const octokit = new Octokit({ auth: process.env.GIT_PAT });
 
 async function fetchPrivateRepos() {
   await octokit
-    .request("GET /pavelpiha/repos", {
-      type: "private",
+    .request("GET /users/{username}/repos", {
+      username: process.env.USER,
       headers: {
         "X-GitHub-Api-Version": "2022-11-28",
       },
@@ -19,6 +17,19 @@ async function fetchPrivateRepos() {
       console.error("Error fetching repos:", error.message);
     });
 }
+
+async function fetchAllRepositories() {
+  await octokit.rest.repos
+    .listForOrg({
+      org: ORG_NAME,
+      type: "private",
+    })
+    .then(({ data }) => {
+      // handle data
+      console.log("data", data);
+    });
+}
+
 async function searchPrivateRepos() {
   await octokit
     .request("GET /search/repositories", {
