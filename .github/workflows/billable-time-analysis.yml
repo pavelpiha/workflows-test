@@ -13,7 +13,7 @@ jobs:
       actions: read
     env:
       USER: "pavelpiha"
-      GITPAT: ${{secrets.GIT_PAT_FINE_GRAINED}}
+      GITPAT: ${{secrets.GITPAT}}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
