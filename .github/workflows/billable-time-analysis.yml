@@ -19,8 +19,8 @@ jobs:
           node-version: 20
         env:
           USER: "pavelpiha"
-          # GITPAT: ${{secrets.GITPAT}}
-          GITPAT: ${{secrets.GIT_PAT_FINE_GRAINED}}
+          GITPAT: ${{secrets.GITPAT}}
+          # GITPAT: ${{secrets.GIT_PAT_FINE_GRAINED}}
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: Install Dependencies
         run: npm install @octokit/rest @octokit/core
