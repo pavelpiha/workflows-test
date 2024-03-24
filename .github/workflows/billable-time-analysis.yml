@@ -13,9 +13,9 @@ jobs:
       actions: read
     env:
       USER: "pavelpiha"
-      # GIT_PAT: ${{secrets.GIT_PAT_FINE_GRAINED}}
       GIT_PAT: ${{secrets.GITPAT}}
-      # GIT_PAT: ${{secrets.GITHUB_TOKEN}}
+      # GIT_PAT: ${{secrets.GIT_PAT_FINE_GRAINED}}  //this works!!!
+      # GIT_PAT: ${{secrets.GITHUB_TOKEN}}  //this does not work!!!
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

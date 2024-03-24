@@ -43,9 +43,6 @@ async function fetchRepos(page = 1, repoArr = []) {
       per_page: 100,
       page,
     })
-    .then((response) => {
-      console.log("%%%%%%%%%%%%%%%Repos:", response.data);
-    })
     .catch((error) => {
       console.error("$$$$$$$$$$$$$$$:", error.message);
     });
