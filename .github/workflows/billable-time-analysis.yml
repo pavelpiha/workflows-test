@@ -20,7 +20,8 @@ jobs:
         env:
           USER: "pavelpiha"
           # GITPAT: ${{secrets.GITPAT}}
-          GITPAT: ${{secrets.GIT_PAT_FINE_GRAINED}}
+          # GITPAT: ${{secrets.GIT_PAT_FINE_GRAINED}}
+          GITPAT: ${{secrets.GITHUB_TOKEN}}
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: Install Dependencies
         run: npm install @octokit/rest @octokit/core
