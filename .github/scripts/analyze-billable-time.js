@@ -4,7 +4,7 @@ const octokit = new Octokit({ auth: process.env.GIT_PAT });
 
 async function fetchPrivateRepos() {
   await octokit
-    .request("GET /users/{username}/repos", {
+    .request(`GET /users/pavelpiha/repos`, {
       username: process.env.USER,
       type: "private",
       headers: {
