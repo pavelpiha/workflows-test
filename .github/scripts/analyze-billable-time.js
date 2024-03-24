@@ -6,7 +6,7 @@ const octokit = new Octokit({
 
 async function fetchPrivateRepos() {
   await octokit
-    .request("GET /user/repos", {
+    .request("GET /pavelpiha/repos", {
       type: "private",
       headers: {
         "X-GitHub-Api-Version": "2022-11-28",
