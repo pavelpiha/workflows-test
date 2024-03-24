@@ -1,13 +1,13 @@
 const { Octokit } = require("@octokit/rest");
 
-const octokit = new Octokit({ auth: process.env.GIT_PAT });
+const USER = process.env.USER;
+const TOKEN = process.env.GIT_PAT;
+const octokit = new Octokit({ auth: TOKEN });
 
 async function fetchPrivateRepos() {
-  console.log("#######################", process.env.USER);
   await octokit
-    // .request(`GET /users/${process.env.USER}/repos`, {
     .request(`GET /users/{username}/repos`, {
-      username: process.env.USER,
+      username: USER,
       type: "private",
       headers: {
         "X-GitHub-Api-Version": "2022-11-28",
@@ -37,11 +37,15 @@ async function fetchPrivateRepos() {
 // }
 
 async function fetchRepos(page = 1, repoArr = []) {
-  const { data } = await octokit.rest.repos.listForAuthenticatedUser({
-    visibility: "private",
-    per_page: 100,
-    page,
-  });
+  const { data } = await octokit.rest.repos
+    .listForAuthenticatedUser({
+      visibility: "private",
+      per_page: 100,
+      page,
+    })
+    .catch((error) => {
+      console.error("$$$$$$$$$$$$$$$$$$$$$", error.message);
+    });
 
   repoArr.push(
     ...data.map((repo) => ({
@@ -50,12 +54,9 @@ async function fetchRepos(page = 1, repoArr = []) {
       actionsUsed: repo.has_actions,
     }))
   );
-
-  // If we have more repos than can be returned on one page
   if (data.length === 100) {
     return await fetchRepos(page + 1, repoArr);
   }
-
   return repoArr;
 }
 
@@ -76,6 +77,6 @@ async function getBillableTime() {
   console.table(reposWithActions);
   console.log("Total Billable time: ", billableTime);
 }
-fetchPrivateRepos();
-// getBillableTime().catch((err) => console.log("11111111111111111111111", err));
+// fetchPrivateRepos();
+getBillableTime().catch((err) => console.log("11111111111111111111111", err));
 // searchPrivateRepos();
