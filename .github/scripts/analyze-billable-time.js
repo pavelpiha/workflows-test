@@ -6,6 +6,7 @@ async function fetchPrivateRepos() {
   await octokit
     .request("GET /users/{username}/repos", {
       username: process.env.USER,
+      type: "private",
       headers: {
         "X-GitHub-Api-Version": "2022-11-28",
       },
@@ -15,18 +16,6 @@ async function fetchPrivateRepos() {
     })
     .catch((error) => {
       console.error("Error fetching repos:", error.message);
-    });
-}
-
-async function fetchAllRepositories() {
-  await octokit.rest.repos
-    .listForOrg({
-      org: ORG_NAME,
-      type: "private",
-    })
-    .then(({ data }) => {
-      // handle data
-      console.log("data", data);
     });
 }
 
