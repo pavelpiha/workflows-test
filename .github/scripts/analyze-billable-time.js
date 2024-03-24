@@ -4,7 +4,8 @@ const octokit = new Octokit({ auth: process.env.GIT_PAT });
 
 async function fetchPrivateRepos() {
   await octokit
-    .request(`GET /users/pavelpiha/repos`, {
+    // .request(`GET /users/${process.env.USER}/repos`, {
+    .request(`GET /users/{username}/repos`, {
       username: process.env.USER,
       type: "private",
       headers: {
@@ -19,20 +20,20 @@ async function fetchPrivateRepos() {
     });
 }
 
-async function searchPrivateRepos() {
-  await octokit
-    .request("GET /search/repositories", {
-      headers: {
-        "X-GitHub-Api-Version": "2022-11-28",
-      },
-    })
-    .then((response) => {
-      console.log("Repos:", response.data);
-    })
-    .catch((error) => {
-      console.error("@@@@@@@@@@@@@@@ Error search repos:", error.message);
-    });
-}
+// async function searchPrivateRepos() {
+//   await octokit
+//     .request("GET /search/repositories", {
+//       headers: {
+//         "X-GitHub-Api-Version": "2022-11-28",
+//       },
+//     })
+//     .then((response) => {
+//       console.log("Repos:", response.data);
+//     })
+//     .catch((error) => {
+//       console.error("@@@@@@@@@@@@@@@ Error search repos:", error.message);
+//     });
+// }
 
 async function fetchRepos(page = 1, repoArr = []) {
   const { data } = await octokit.rest.repos.listForAuthenticatedUser({
@@ -74,6 +75,6 @@ async function getBillableTime() {
   console.table(reposWithActions);
   console.log("Total Billable time: ", billableTime);
 }
-getBillableTime().catch((err) => console.log("11111111111111111111111", err));
 fetchPrivateRepos();
-searchPrivateRepos();
+// getBillableTime().catch((err) => console.log("11111111111111111111111", err));
+// searchPrivateRepos();
