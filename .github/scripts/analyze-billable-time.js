@@ -1,12 +1,13 @@
 const { Octokit } = require("@octokit/rest");
 
-const octokit = new Octokit({
-  auth: process.env.GITPAT,
-});
+const USER = process.env.USER;
+const TOKEN = process.env.GIT_PAT;
+const octokit = new Octokit({ auth: TOKEN });
 
 async function fetchPrivateRepos() {
   await octokit
-    .request("GET /user/repos", {
+    .request(`GET /users/{username}/repos`, {
+      username: USER,
       type: "private",
       headers: {
         "X-GitHub-Api-Version": "2022-11-28",
@@ -20,12 +21,31 @@ async function fetchPrivateRepos() {
     });
 }
 
+// async function searchPrivateRepos() {
+//   await octokit
+//     .request("GET /search/repositories", {
+//       headers: {
+//         "X-GitHub-Api-Version": "2022-11-28",
+//       },
+//     })
+//     .then((response) => {
+//       console.log("Repos:", response.data);
+//     })
+//     .catch((error) => {
+//       console.error("@@@@@@@@@@@@@@@ Error search repos:", error.message);
+//     });
+// }
+
 async function fetchRepos(page = 1, repoArr = []) {
-  const { data } = await octokit.rest.repos.listForAuthenticatedUser({
-    visibility: "private",
-    per_page: 100,
-    page,
-  });
+  const { data } = await octokit.rest.repos
+    .listForAuthenticatedUser({
+      visibility: "private",
+      per_page: 100,
+      page,
+    })
+    .catch((error) => {
+      console.error("$$$$$$$$$$$$$$$:", error.message);
+    });
 
   repoArr.push(
     ...data.map((repo) => ({
@@ -34,16 +54,13 @@ async function fetchRepos(page = 1, repoArr = []) {
       actionsUsed: repo.has_actions,
     }))
   );
-
-  // If we have more repos than can be returned on one page
   if (data.length === 100) {
     return await fetchRepos(page + 1, repoArr);
   }
-
   return repoArr;
 }
 
-(async () => {
+async function getBillableTime() {
   const repos = await fetchRepos(); // fetch all private repos
   const reposWithActions = repos.filter((repo) => repo.actionsUsed); // find ones using Actions
   let billableTime = 0;
@@ -59,6 +76,7 @@ async function fetchRepos(page = 1, repoArr = []) {
 
   console.table(reposWithActions);
   console.log("Total Billable time: ", billableTime);
-})().catch((err) => console.error(err));
-
-fetchPrivateRepos();
+}
+// fetchPrivateRepos();
+getBillableTime().catch((err) => console.log("11111111111111111111111", err));
+// searchPrivateRepos();
