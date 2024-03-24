@@ -1,8 +1,9 @@
 const { Octokit } = require("@octokit/rest");
 
 const USER = process.env.USER;
-const TOKEN = process.env.GIT_PAT;
-const octokit = new Octokit({ auth: TOKEN });
+// const TOKEN = process.env.GIT_PAT;
+const octokit = new Octokit({ auth: process.env.GIT_PAT });
+// const octokit = new Octokit({ auth: TOKEN });
 
 async function fetchPrivateRepos() {
   await octokit
