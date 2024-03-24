@@ -13,7 +13,7 @@ jobs:
       actions: read
     env:
       USER: "pavelpiha"
-      GIT_PAT: ${{secrets.GITPAT}}
+      GIT_PAT: ${{secrets.GITHUB_TOKEN}}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
